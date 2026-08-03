@@ -1,0 +1,6 @@
+{
+  "name": "Student Ranking Simulator",
+  "description": "A validation tool for the LNBTI Student Balanced Ranking System, featuring diminishing returns logic, 40% dominance capping, and balance gate checks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
