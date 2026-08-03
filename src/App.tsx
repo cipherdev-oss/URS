@@ -15,7 +15,14 @@ import { ActivityManager } from './components/ActivityManager';
 import { RulesView } from './components/RulesView';
 import { ChatBot } from './components/ChatBot';
 import { StudentComparisonView } from './components/StudentComparisonView';
-import { Scale } from 'lucide-react';
+import { Scale, Cloud, Globe } from 'lucide-react';
+import { 
+  subscribeToStudents, 
+  subscribeToActivities, 
+  saveStudentDoc, 
+  deleteStudentDoc, 
+  saveActivityDoc 
+} from './lib/firestoreSync';
 
 const STORAGE_STUDENTS_KEY = 'scoring_students_v4';
 const STORAGE_ACTIVITIES_KEY = 'scoring_activities_v3';
@@ -120,7 +127,6 @@ const DUMMY_STUDENTS: Student[] = [
 export default function App() {
   const [students, setStudents] = useState<Student[]>(() => {
     try {
-      // Check current key and fallback to older keys to prevent resetting user modifications
       const keysToTry = [
         STORAGE_STUDENTS_KEY,
         'scoring_students_v3',
@@ -128,16 +134,11 @@ export default function App() {
         'scoring_students_v1',
         'scoring_students'
       ];
-
       for (const key of keysToTry) {
         const saved = localStorage.getItem(key);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            // Migrate to active storage key
-            localStorage.setItem(STORAGE_STUDENTS_KEY, JSON.stringify(parsed));
-            return parsed;
-          }
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
       }
     } catch (e) {
@@ -167,6 +168,28 @@ export default function App() {
     message: string;
   } | null>(null);
 
+  // Real-time Firestore synchronization for Students and Activities
+  useEffect(() => {
+    const unsubStudents = subscribeToStudents((updatedStudents) => {
+      setStudents(updatedStudents);
+      setActiveStudentId(prev => {
+        if (!prev || !updatedStudents.some(s => s.id === prev)) {
+          return updatedStudents[0]?.id || null;
+        }
+        return prev;
+      });
+    }, DUMMY_STUDENTS);
+
+    const unsubActivities = subscribeToActivities((updatedActivities) => {
+      setActivities(updatedActivities);
+    }, ACTIVITIES);
+
+    return () => {
+      unsubStudents();
+      unsubActivities();
+    };
+  }, []);
+
   // Auto dismiss toast after 5 seconds
   useEffect(() => {
     if (toastNotification) {
@@ -175,7 +198,7 @@ export default function App() {
     }
   }, [toastNotification]);
 
-  // Persist students to localStorage
+  // Local Storage caching
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_STUDENTS_KEY, JSON.stringify(students));
@@ -184,7 +207,6 @@ export default function App() {
     }
   }, [students]);
 
-  // Persist activities to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_ACTIVITIES_KEY, JSON.stringify(activities));
@@ -211,8 +233,9 @@ export default function App() {
       activities: [],
       submissionTimestamp: Date.now()
     };
-    setStudents([...students, newStudent]);
+    setStudents(prev => [...prev, newStudent]);
     setActiveStudentId(id);
+    saveStudentDoc(newStudent);
   };
 
   const handleAddActivity = (activityId: string) => {
@@ -238,53 +261,74 @@ export default function App() {
       return;
     }
 
-    setStudents(prev => prev.map(s => {
-      if (s.id !== activeStudentId) return s;
-      const exists = s.activities.find(a => a.activityId === activityId);
-      let newActivities;
-      if (exists) {
-        newActivities = s.activities.map(a => 
-          a.activityId === activityId ? { ...a, count: a.count + 1 } : a
-        );
-      } else {
-        newActivities = [...s.activities, { activityId, count: 1, timestamp: Date.now() }];
-      }
-      return { ...s, activities: newActivities, submissionTimestamp: Date.now() };
-    }));
+    const exists = currentStudent.activities.find(a => a.activityId === activityId);
+    let newActivities;
+    if (exists) {
+      newActivities = currentStudent.activities.map(a => 
+        a.activityId === activityId ? { ...a, count: a.count + 1 } : a
+      );
+    } else {
+      newActivities = [...currentStudent.activities, { activityId, count: 1, timestamp: Date.now() }];
+    }
+
+    const updatedStudent: Student = {
+      ...currentStudent,
+      activities: newActivities,
+      submissionTimestamp: Date.now()
+    };
+
+    setStudents(prev => prev.map(s => s.id === activeStudentId ? updatedStudent : s));
+    saveStudentDoc(updatedStudent);
   };
 
   const handleRemoveOne = (activityId: string) => {
     if (!activeStudentId) return;
-    setStudents(prev => prev.map(s => {
-      if (s.id !== activeStudentId) return s;
-      const existing = s.activities.find(a => a.activityId === activityId);
-      let newActivities;
-      if (existing && existing.count > 1) {
-        newActivities = s.activities.map(a => 
-          a.activityId === activityId ? { ...a, count: a.count - 1 } : a
-        );
-      } else {
-        newActivities = s.activities.filter(a => a.activityId !== activityId);
-      }
-      return { ...s, activities: newActivities, submissionTimestamp: Date.now() };
-    }));
+    const currentStudent = students.find(s => s.id === activeStudentId);
+    if (!currentStudent) return;
+
+    const existing = currentStudent.activities.find(a => a.activityId === activityId);
+    let newActivities;
+    if (existing && existing.count > 1) {
+      newActivities = currentStudent.activities.map(a => 
+        a.activityId === activityId ? { ...a, count: a.count - 1 } : a
+      );
+    } else {
+      newActivities = currentStudent.activities.filter(a => a.activityId !== activityId);
+    }
+
+    const updatedStudent: Student = {
+      ...currentStudent,
+      activities: newActivities,
+      submissionTimestamp: Date.now()
+    };
+
+    setStudents(prev => prev.map(s => s.id === activeStudentId ? updatedStudent : s));
+    saveStudentDoc(updatedStudent);
   };
 
   const handleDeleteActivityAll = (activityId: string) => {
     if (!activeStudentId) return;
-    setStudents(prev => prev.map(s => {
-      if (s.id !== activeStudentId) return s;
-      return { 
-        ...s, 
-        activities: s.activities.filter(a => a.activityId !== activityId), 
-        submissionTimestamp: Date.now() 
-      };
-    }));
+    const currentStudent = students.find(s => s.id === activeStudentId);
+    if (!currentStudent) return;
+
+    const updatedStudent: Student = { 
+      ...currentStudent, 
+      activities: currentStudent.activities.filter(a => a.activityId !== activityId), 
+      submissionTimestamp: Date.now() 
+    };
+
+    setStudents(prev => prev.map(s => s.id === activeStudentId ? updatedStudent : s));
+    saveStudentDoc(updatedStudent);
   };
 
   const updateStudentMetadata = (updates: Partial<Student>) => {
     if (!activeStudentId) return;
-    setStudents(prev => prev.map(s => s.id === activeStudentId ? { ...s, ...updates } : s));
+    const currentStudent = students.find(s => s.id === activeStudentId);
+    if (!currentStudent) return;
+
+    const updatedStudent: Student = { ...currentStudent, ...updates };
+    setStudents(prev => prev.map(s => s.id === activeStudentId ? updatedStudent : s));
+    saveStudentDoc(updatedStudent);
   };
 
   const deleteStudent = (id: string) => {
@@ -293,14 +337,17 @@ export default function App() {
     if (activeStudentId === id) {
       setActiveStudentId(newStudents[0]?.id || null);
     }
+    deleteStudentDoc(id);
   };
 
   const handleAddActivityRule = (newAct: Activity) => {
     setActivities(prev => [...prev, newAct]);
+    saveActivityDoc(newAct);
   };
 
   const handleUpdateActivityRule = (updatedAct: Activity) => {
     setActivities(prev => prev.map(a => a.id === updatedAct.id ? updatedAct : a));
+    saveActivityDoc(updatedAct);
   };
 
   const handleRemoveActivityRule = (id: string) => {
@@ -309,12 +356,14 @@ export default function App() {
 
   const handleResetAllRules = () => {
     setActivities(ACTIVITIES);
+    ACTIVITIES.forEach(a => saveActivityDoc(a));
   };
 
   const handleResetItemRule = (id: string) => {
     const original = ACTIVITIES.find(a => a.id === id);
     if (original) {
       setActivities(prev => prev.map(a => a.id === id ? { ...original } : a));
+      saveActivityDoc(original);
     }
   };
 
@@ -401,6 +450,12 @@ export default function App() {
                 <Scale className="w-3.5 h-3.5 text-blue-400" />
                 Compare Students
               </button>
+            </div>
+
+            {/* Global Live Cloud Sync Indicator */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-medium shadow-sm">
+              <Cloud className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <span>Global Live Sync Active</span>
             </div>
           </div>
 

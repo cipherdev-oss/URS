@@ -1,0 +1,20 @@
+{
+  "collections": [
+    {
+      "name": "students",
+      "description": "Student profiles with logged activities and scores",
+      "rules": {
+        "read": true,
+        "write": true
+      }
+    },
+    {
+      "name": "activities",
+      "description": "Activity rules and scoring configuration",
+      "rules": {
+        "read": true,
+        "write": true
+      }
+    }
+  ]
+}
