@@ -18,18 +18,20 @@ function cn(...inputs: ClassValue[]) {
 interface LeaderboardProps {
   students: Student[];
   onSelectStudent: (student: Student) => void;
-  customActivities: Activity[];
+  activities?: Activity[];
+  customActivities?: Activity[];
   activeStudentId: string | null;
 }
 
-export function Leaderboard({ students, onSelectStudent, customActivities, activeStudentId }: LeaderboardProps) {
+export function Leaderboard({ students, onSelectStudent, activities, customActivities = [], activeStudentId }: LeaderboardProps) {
   const years = Object.values(YearGroup);
+  const activeActivities = activities || customActivities;
 
   return (
     <div className="space-y-8">
       {years.map(year => {
         const yearStudents = students.filter(s => s.yearGroup === year);
-        const rankings = rankStudents(yearStudents, customActivities);
+        const rankings = rankStudents(yearStudents, activeActivities);
         
         return (
           <div key={year} className="space-y-3">

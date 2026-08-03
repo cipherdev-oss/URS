@@ -40,13 +40,40 @@ export const ACTIVITIES: Activity[] = [
   { id: "guest_lec", pillar: Pillar.Community, name: "Guest Lecture Attendance", base: 2, step: 0.5, floor: 1, type: "Passive", hardCap: 10 },
 ];
 
+export function getEffectiveActivities(customOrAllActivities: Activity[] = []): Activity[] {
+  const map = new Map<string, Activity>();
+  // Base defaults
+  ACTIVITIES.forEach(a => map.set(a.id, a));
+  // Overrides / custom
+  customOrAllActivities.forEach(a => map.set(a.id, a));
+  return Array.from(map.values());
+}
+
+export function getMaxCountForActivity(act: Activity): number {
+  if (act.type === 'Milestone') return 1;
+  if (act.hardCap !== undefined && act.hardCap > 0) {
+    let total = 0;
+    let count = 0;
+    while (total < act.hardCap && count < 100) {
+      count++;
+      const pts = calculateDRPoints(act, count);
+      total += pts;
+      if (total >= act.hardCap) return count;
+    }
+    return Math.max(1, count);
+  }
+  return Infinity;
+}
+
 export function calculateDRPoints(activity: Activity, n: number): number {
   if (n <= 0) return 0;
   // Points for the Nth repetition = max(FLOOR, BASE - (N - 1) * STEP)
   return Math.max(activity.floor, activity.base - (n - 1) * activity.step);
 }
 
-export function calculatePillarScore(pillar: Pillar, studentActivities: StudentActivity[], allActivities: Activity[]): number {
+export function calculatePillarScore(pillar: Pillar, studentActivities: StudentActivity[], customActivities: Activity[] = []): number {
+  const allActivities = getEffectiveActivities(customActivities);
+
   const pillarActivities = studentActivities.filter(sa => {
     const act = allActivities.find(a => a.id === sa.activityId);
     return act?.pillar === pillar;
@@ -63,7 +90,7 @@ export function calculatePillarScore(pillar: Pillar, studentActivities: StudentA
       points += calculateDRPoints(act, i);
     }
 
-    if (act.hardCap) {
+    if (act.hardCap !== undefined && act.hardCap > 0) {
       points = Math.min(points, act.hardCap);
     }
 
@@ -117,7 +144,7 @@ export function calculateCappedScores(rawScores: Record<Pillar, number>): Record
 }
 
 export function calculateScoreBreakdown(studentActivities: StudentActivity[], customActivities: Activity[] = []): ScoreBreakdown {
-  const allActivities = [...ACTIVITIES, ...customActivities];
+  const allActivities = getEffectiveActivities(customActivities);
   const raw: any = {};
   Object.values(Pillar).forEach(p => {
     raw[p] = calculatePillarScore(p, studentActivities, allActivities);

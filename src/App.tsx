@@ -7,12 +7,16 @@ import React, { useState, useEffect } from 'react';
 import { ActivitySelector } from './components/ActivitySelector';
 import { ScoreDashboard } from './components/ScoreDashboard';
 import { YearGroup, Student, StudentActivity, ScoreBreakdown, Pillar, Activity } from './types';
-import { calculateScoreBreakdown, ACTIVITIES } from './lib/scoring';
-import { Trash2, History, RotateCcw, Award, Users, PlusCircle, LayoutDashboard, ChevronRight, Settings, Info } from 'lucide-react';
+import { calculateScoreBreakdown, ACTIVITIES, getMaxCountForActivity, getEffectiveActivities } from './lib/scoring';
+import { Trash2, History, RotateCcw, Award, Users, PlusCircle, LayoutDashboard, ChevronRight, Settings, Info, AlertTriangle, X, Plus, Minus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Leaderboard } from './components/Leaderboard';
 import { ActivityManager } from './components/ActivityManager';
 import { RulesView } from './components/RulesView';
+import { ChatBot } from './components/ChatBot';
+
+const STORAGE_STUDENTS_KEY = 'scoring_students_v3';
+const STORAGE_ACTIVITIES_KEY = 'scoring_activities_v3';
 
 const DUMMY_STUDENTS: Student[] = [
   {
@@ -41,20 +45,70 @@ const DUMMY_STUDENTS: Student[] = [
 ];
 
 export default function App() {
-  const [students, setStudents] = useState<Student[]>(DUMMY_STUDENTS);
-  const [customActivities, setCustomActivities] = useState<Activity[]>([]);
-  const [activeStudentId, setActiveStudentId] = useState<string | null>(DUMMY_STUDENTS[0].id);
+  const [students, setStudents] = useState<Student[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_STUDENTS_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load saved students", e);
+    }
+    return DUMMY_STUDENTS;
+  });
+
+  const [activities, setActivities] = useState<Activity[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_ACTIVITIES_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load saved activities", e);
+    }
+    return ACTIVITIES;
+  });
+
+  const [activeStudentId, setActiveStudentId] = useState<string | null>(() => students[0]?.id || null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
+  
+  const [toastNotification, setToastNotification] = useState<{
+    id: string;
+    title: string;
+    message: string;
+  } | null>(null);
+
+  // Auto dismiss toast after 5 seconds
+  useEffect(() => {
+    if (toastNotification) {
+      const timer = setTimeout(() => setToastNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastNotification]);
+
+  // Persist students to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_STUDENTS_KEY, JSON.stringify(students));
+    } catch (e) {
+      console.error("Failed to persist students", e);
+    }
+  }, [students]);
+
+  // Persist activities to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_ACTIVITIES_KEY, JSON.stringify(activities));
+    } catch (e) {
+      console.error("Failed to persist activities", e);
+    }
+  }, [activities]);
 
   const activeStudent = students.find(s => s.id === activeStudentId);
   const [breakdown, setBreakdown] = useState<ScoreBreakdown>(calculateScoreBreakdown([], []));
 
   useEffect(() => {
     if (activeStudent) {
-      setBreakdown(calculateScoreBreakdown(activeStudent.activities, customActivities));
+      setBreakdown(calculateScoreBreakdown(activeStudent.activities, activities));
     }
-  }, [activeStudent, customActivities]);
+  }, [activeStudent, activities]);
 
   const handleAddStudent = () => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -71,11 +125,32 @@ export default function App() {
 
   const handleAddActivity = (activityId: string) => {
     if (!activeStudentId) return;
+    
+    const allEffective = getEffectiveActivities(activities);
+    const act = allEffective.find(a => a.id === activityId);
+    if (!act) return;
+
+    const currentStudent = students.find(s => s.id === activeStudentId);
+    if (!currentStudent) return;
+
+    const existing = currentStudent.activities.find(a => a.activityId === activityId);
+    const currentCount = existing ? existing.count : 0;
+    const maxCount = getMaxCountForActivity(act);
+
+    if (currentCount >= maxCount) {
+      setToastNotification({
+        id: Date.now().toString(),
+        title: 'Activity Cap Limit Reached',
+        message: `Cannot add more "${act.name}". Limit of ${maxCount} ${maxCount === 1 ? 'entry' : 'entries'} ${act.hardCap !== undefined ? `(${act.hardCap} pts cap)` : ''} has been reached for this student.`
+      });
+      return;
+    }
+
     setStudents(prev => prev.map(s => {
       if (s.id !== activeStudentId) return s;
-      const existing = s.activities.find(a => a.activityId === activityId);
+      const exists = s.activities.find(a => a.activityId === activityId);
       let newActivities;
-      if (existing) {
+      if (exists) {
         newActivities = s.activities.map(a => 
           a.activityId === activityId ? { ...a, count: a.count + 1 } : a
         );
@@ -103,6 +178,18 @@ export default function App() {
     }));
   };
 
+  const handleDeleteActivityAll = (activityId: string) => {
+    if (!activeStudentId) return;
+    setStudents(prev => prev.map(s => {
+      if (s.id !== activeStudentId) return s;
+      return { 
+        ...s, 
+        activities: s.activities.filter(a => a.activityId !== activityId), 
+        submissionTimestamp: Date.now() 
+      };
+    }));
+  };
+
   const updateStudentMetadata = (updates: Partial<Student>) => {
     if (!activeStudentId) return;
     setStudents(prev => prev.map(s => s.id === activeStudentId ? { ...s, ...updates } : s));
@@ -116,8 +203,28 @@ export default function App() {
     }
   };
 
-  const handleAddCustomActivity = (act: Activity) => setCustomActivities([...customActivities, act]);
-  const handleRemoveCustomActivity = (id: string) => setCustomActivities(customActivities.filter(a => a.id !== id));
+  const handleAddActivityRule = (newAct: Activity) => {
+    setActivities(prev => [...prev, newAct]);
+  };
+
+  const handleUpdateActivityRule = (updatedAct: Activity) => {
+    setActivities(prev => prev.map(a => a.id === updatedAct.id ? updatedAct : a));
+  };
+
+  const handleRemoveActivityRule = (id: string) => {
+    setActivities(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleResetAllRules = () => {
+    setActivities(ACTIVITIES);
+  };
+
+  const handleResetItemRule = (id: string) => {
+    const original = ACTIVITIES.find(a => a.id === id);
+    if (original) {
+      setActivities(prev => prev.map(a => a.id === id ? { ...original } : a));
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#020617] text-slate-100 overflow-hidden font-sans selection:bg-blue-500/30 selection:text-blue-100">
@@ -162,7 +269,7 @@ export default function App() {
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <Leaderboard 
             students={students} 
-            customActivities={customActivities}
+            activities={activities}
             onSelectStudent={(s) => setActiveStudentId(s.id)}
             activeStudentId={activeStudentId}
           />
@@ -171,6 +278,31 @@ export default function App() {
 
       {/* 2. Main Content: Analytics & Workspace */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Floating Cap Notification Toast */}
+        <AnimatePresence>
+          {toastNotification && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="absolute top-4 right-8 z-[200] max-w-md bg-amber-950/90 border border-amber-500/50 text-amber-100 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-start gap-3"
+            >
+              <div className="p-2 bg-amber-500/20 rounded-xl text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 pr-2">
+                <h4 className="text-sm font-bold text-amber-200">{toastNotification.title}</h4>
+                <p className="text-xs text-amber-300/80 mt-1 leading-relaxed">{toastNotification.message}</p>
+              </div>
+              <button 
+                onClick={() => setToastNotification(null)}
+                className="p-1 text-amber-400 hover:text-amber-100 hover:bg-amber-500/20 rounded-lg transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {activeStudent ? (
           <>
             {/* Context Header */}
@@ -242,35 +374,88 @@ export default function App() {
 
                 {/* Right Input Panel */}
                 <div className="xl:col-span-5 space-y-6 flex flex-col min-h-0">
-                  <div className="h-[400px] shrink-0">
-                    <ActivitySelector onAdd={handleAddActivity} customActivities={customActivities} />
+                  <div className="h-[550px] shrink-0">
+                    <ActivitySelector 
+                      onAdd={handleAddActivity} 
+                      activities={activities}
+                      currentStudentActivities={activeStudent?.activities} 
+                    />
                   </div>
                   
                   <div className="flex-1 min-h-[300px] bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden shadow-xl">
-                    <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-                      <History className="w-4 h-4 text-slate-500" />
-                      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Activity Ledger</h3>
+                    <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <History className="w-4 h-4 text-slate-500" />
+                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Activity Ledger</h3>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
+                        {activeStudent.activities.reduce((sum, a) => sum + a.count, 0)} Total Logged
+                      </span>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                       {activeStudent.activities.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-slate-600 text-xs italic">
-                          No activities recorded.
+                          No activities recorded for {activeStudent.name}.
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {activeStudent.activities.map((sa) => {
-                            const activity = [...ACTIVITIES, ...customActivities].find(a => a.id === sa.activityId);
+                            const activity = activities.find(a => a.id === sa.activityId) || ACTIVITIES.find(a => a.id === sa.activityId);
+                            if (!activity) return null;
+                            const maxCount = getMaxCountForActivity(activity);
+                            const isAtCap = sa.count >= maxCount;
+
                             return (
-                              <div key={sa.activityId} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/40 border border-slate-800 group hover:border-slate-700 transition-all">
+                              <div key={sa.activityId} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                isAtCap ? 'bg-amber-500/5 border-amber-500/30' : 'bg-slate-800/40 border-slate-800 hover:border-slate-700'
+                              }`}>
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-blue-400 text-[10px]">
+                                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold font-mono text-xs ${
+                                    isAtCap ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-slate-800 text-blue-400 border-slate-700'
+                                  }`}>
                                     {sa.count}
                                   </div>
-                                  <div className="text-[11px] font-medium text-slate-300">{activity?.name}</div>
+                                  <div>
+                                    <div className="text-xs font-medium text-slate-200">{activity.name}</div>
+                                    <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                                      <span>{activity.pillar}</span>
+                                      <span>•</span>
+                                      <span className={isAtCap ? "text-amber-400 font-bold" : "text-slate-500"}>
+                                        {isAtCap ? `Cap Reached (${sa.count}/${maxCount})` : `Count: ${sa.count} / ${maxCount === Infinity ? '∞' : maxCount}`}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <button onClick={() => handleRemoveOne(sa.activityId)} className="p-1.5 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+
+                                <div className="flex items-center gap-1">
+                                  <button 
+                                    onClick={() => handleRemoveOne(sa.activityId)}
+                                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition-all"
+                                    title="Decrease Count"
+                                  >
+                                    <Minus className="w-3.5 h-3.5" />
+                                  </button>
+                                  
+                                  <button 
+                                    onClick={() => handleAddActivity(sa.activityId)}
+                                    className={`p-1.5 rounded-lg transition-all ${
+                                      isAtCap 
+                                        ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30' 
+                                        : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200'
+                                    }`}
+                                    title={isAtCap ? `Max Cap Reached (${sa.count}/${maxCount})` : "Increase Count"}
+                                  >
+                                    {isAtCap ? <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> : <Plus className="w-3.5 h-3.5" />}
+                                  </button>
+
+                                  <button 
+                                    onClick={() => handleDeleteActivityAll(sa.activityId)} 
+                                    className="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all ml-1"
+                                    title="Remove from Ledger"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
@@ -341,15 +526,21 @@ export default function App() {
                   </button>
                 </div>
                 <ActivityManager 
-                  customActivities={customActivities}
-                  onAdd={handleAddCustomActivity}
-                  onRemove={handleRemoveCustomActivity}
+                  activities={activities}
+                  onAdd={handleAddActivityRule}
+                  onUpdate={handleUpdateActivityRule}
+                  onRemove={handleRemoveActivityRule}
+                  onResetAll={handleResetAllRules}
+                  onResetItem={handleResetItemRule}
                 />
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* Floating AI System Chatbot */}
+      <ChatBot />
     </div>
   );
 }
