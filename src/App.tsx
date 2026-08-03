@@ -24,12 +24,229 @@ import {
   saveActivityDoc 
 } from './lib/firestoreSync';
 
-const STORAGE_STUDENTS_KEY = 'scoring_students_v4';
+const STORAGE_STUDENTS_KEY = 'scoring_students_v5';
 const STORAGE_ACTIVITIES_KEY = 'scoring_activities_v3';
 
 const DUMMY_STUDENTS: Student[] = [
+  // --- 1st Year (5 Students) ---
   {
-    id: 's1',
+    id: 's1_1',
+    name: 'Farhan Tan',
+    yearGroup: YearGroup.First,
+    activities: [
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 1500000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 1200000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 900000 },
+      { activityId: 'cert', count: 1, timestamp: Date.now() - 600000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 300000 },
+    ],
+    submissionTimestamp: Date.now() - 1500000
+  },
+  {
+    id: 's1_2',
+    name: 'Grace Wijaya',
+    yearGroup: YearGroup.First,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 1800000 },
+      { activityId: 'sub_comm', count: 2, timestamp: Date.now() - 1400000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1000000 },
+      { activityId: 'org_tech_ws', count: 1, timestamp: Date.now() - 700000 },
+      { activityId: 'guest_lec', count: 3, timestamp: Date.now() - 400000 },
+    ],
+    submissionTimestamp: Date.now() - 1800000
+  },
+  {
+    id: 's1_3',
+    name: 'Hannah Miller',
+    yearGroup: YearGroup.First,
+    activities: [
+      { activityId: 'gpa_20', count: 1, timestamp: Date.now() - 2000000 },
+      { activityId: 'sports_silver', count: 1, timestamp: Date.now() - 1600000 },
+      { activityId: 'squad', count: 1, timestamp: Date.now() - 1200000 },
+      { activityId: 'peer_end', count: 2, timestamp: Date.now() - 800000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 500000 },
+    ],
+    submissionTimestamp: Date.now() - 2000000
+  },
+  {
+    id: 's1_4',
+    name: 'Ian Kalu',
+    yearGroup: YearGroup.First,
+    activities: [
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 2200000 },
+      { activityId: 'oss_contrib', count: 2, timestamp: Date.now() - 1700000 },
+      { activityId: 'cert', count: 1, timestamp: Date.now() - 1300000 },
+      { activityId: 'org_non_tech_ws', count: 1, timestamp: Date.now() - 900000 },
+      { activityId: 'guest_lec', count: 3, timestamp: Date.now() - 600000 },
+    ],
+    submissionTimestamp: Date.now() - 2200000
+  },
+  {
+    id: 's1_5',
+    name: 'Julia Vance',
+    yearGroup: YearGroup.First,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 2400000 },
+      { activityId: 'dean', count: 1, timestamp: Date.now() - 2100000 },
+      { activityId: 'sub_comm', count: 1, timestamp: Date.now() - 1700000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1100000 },
+      { activityId: 'peer_end', count: 1, timestamp: Date.now() - 700000 },
+    ],
+    submissionTimestamp: Date.now() - 2400000
+  },
+
+  // --- 2nd Year (5 Students) ---
+  {
+    id: 's2_1',
+    name: 'David Jayawardena',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_20', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'su_pres', count: 1, timestamp: Date.now() - 2800000 },
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'sports_int', count: 2, timestamp: Date.now() - 2000000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1500000 },
+      { activityId: 'oss_contrib', count: 1, timestamp: Date.now() - 1000000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 500000 },
+    ],
+    submissionTimestamp: Date.now() - 3000000
+  },
+  {
+    id: 's2_2',
+    name: 'Elena Rostova',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'ta', count: 1, timestamp: Date.now() - 2200000 },
+      { activityId: 'sub_comm', count: 3, timestamp: Date.now() - 2000000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1800000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
+      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 1200000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 800000 },
+      { activityId: 'peer_end', count: 3, timestamp: Date.now() - 400000 },
+    ],
+    submissionTimestamp: Date.now() - 2500000
+  },
+  {
+    id: 's2_3',
+    name: 'Kevin Alistair',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 3200000 },
+      { activityId: 'dean', count: 1, timestamp: Date.now() - 2900000 },
+      { activityId: 'hack_win_nat', count: 1, timestamp: Date.now() - 2600000 },
+      { activityId: 'oss_contrib', count: 3, timestamp: Date.now() - 2100000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1600000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 1100000 },
+    ],
+    submissionTimestamp: Date.now() - 3200000
+  },
+  {
+    id: 's2_4',
+    name: 'Laura Croft',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 3400000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'sub_comm', count: 2, timestamp: Date.now() - 2700000 },
+      { activityId: 'sports_silver', count: 2, timestamp: Date.now() - 2200000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 1700000 },
+      { activityId: 'peer_end', count: 2, timestamp: Date.now() - 1200000 },
+    ],
+    submissionTimestamp: Date.now() - 3400000
+  },
+  {
+    id: 's2_5',
+    name: 'Michael Scott',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 3600000 },
+      { activityId: 'sports_gold', count: 2, timestamp: Date.now() - 3100000 },
+      { activityId: 'squad', count: 2, timestamp: Date.now() - 2500000 },
+      { activityId: 'org_tech_ws', count: 1, timestamp: Date.now() - 1900000 },
+      { activityId: 'guest_lec', count: 4, timestamp: Date.now() - 1300000 },
+    ],
+    submissionTimestamp: Date.now() - 3600000
+  },
+
+  // --- 3rd Year (5 Students) ---
+  {
+    id: 's3_1',
+    name: 'Bob Smith',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 4000000 },
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 3500000 },
+      { activityId: 'sports_silver', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'hack_win_int', count: 2, timestamp: Date.now() - 2500000 },
+      { activityId: 'oss_contrib', count: 3, timestamp: Date.now() - 2000000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 1000000 },
+    ],
+    submissionTimestamp: Date.now() - 4000000
+  },
+  {
+    id: 's3_2',
+    name: 'Nina Patel',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 4200000 },
+      { activityId: 'paper', count: 1, timestamp: Date.now() - 3800000 },
+      { activityId: 'conf', count: 1, timestamp: Date.now() - 3400000 },
+      { activityId: 'ta', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 2600000 },
+      { activityId: 'sub_comm', count: 2, timestamp: Date.now() - 2100000 },
+      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 1600000 },
+    ],
+    submissionTimestamp: Date.now() - 4200000
+  },
+  {
+    id: 's3_3',
+    name: 'Oscar Rodriguez',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_20', count: 1, timestamp: Date.now() - 4500000 },
+      { activityId: 'hack_win_nat', count: 2, timestamp: Date.now() - 4000000 },
+      { activityId: 'oss_contrib', count: 4, timestamp: Date.now() - 3500000 },
+      { activityId: 'cert', count: 3, timestamp: Date.now() - 2900000 },
+      { activityId: 'org_tech_ws', count: 3, timestamp: Date.now() - 2200000 },
+      { activityId: 'peer_end', count: 3, timestamp: Date.now() - 1500000 },
+    ],
+    submissionTimestamp: Date.now() - 4500000
+  },
+  {
+    id: 's3_4',
+    name: 'Priya Sharma',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 4700000 },
+      { activityId: 'dean', count: 1, timestamp: Date.now() - 4300000 },
+      { activityId: 'su_pres', count: 1, timestamp: Date.now() - 3800000 },
+      { activityId: 'sports_int', count: 1, timestamp: Date.now() - 3200000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 2500000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 1800000 },
+    ],
+    submissionTimestamp: Date.now() - 4700000
+  },
+  {
+    id: 's3_5',
+    name: 'Quentin Blake',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 4900000 },
+      { activityId: 'ta', count: 1, timestamp: Date.now() - 4400000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 3900000 },
+      { activityId: 'squad', count: 3, timestamp: Date.now() - 3300000 },
+      { activityId: 'cert', count: 1, timestamp: Date.now() - 2700000 },
+      { activityId: 'guest_lec', count: 3, timestamp: Date.now() - 2000000 },
+      { activityId: 'peer_end', count: 2, timestamp: Date.now() - 1300000 },
+    ],
+    submissionTimestamp: Date.now() - 4900000
+  },
+
+  // --- 4th Year (5 Students) ---
+  {
+    id: 's4_1',
     name: 'Alice Johnson',
     yearGroup: YearGroup.Fourth,
     activities: [
@@ -47,22 +264,7 @@ const DUMMY_STUDENTS: Student[] = [
     submissionTimestamp: Date.now() - 5000000
   },
   {
-    id: 's2',
-    name: 'Bob Smith',
-    yearGroup: YearGroup.Third,
-    activities: [
-      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 4000000 },
-      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 3500000 },
-      { activityId: 'sports_silver', count: 1, timestamp: Date.now() - 3000000 },
-      { activityId: 'hack_win_int', count: 2, timestamp: Date.now() - 2500000 },
-      { activityId: 'oss_contrib', count: 3, timestamp: Date.now() - 2000000 },
-      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
-      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 1000000 },
-    ],
-    submissionTimestamp: Date.now() - 4000000
-  },
-  {
-    id: 's3',
+    id: 's4_2',
     name: 'Carol Chen',
     yearGroup: YearGroup.Fourth,
     activities: [
@@ -79,48 +281,51 @@ const DUMMY_STUDENTS: Student[] = [
     submissionTimestamp: Date.now() - 6000000
   },
   {
-    id: 's4',
-    name: 'David Jayawardena',
-    yearGroup: YearGroup.Second,
+    id: 's4_3',
+    name: 'Rachel Green',
+    yearGroup: YearGroup.Fourth,
     activities: [
-      { activityId: 'gpa_20', count: 1, timestamp: Date.now() - 3000000 },
-      { activityId: 'su_pres', count: 1, timestamp: Date.now() - 2800000 },
-      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 2500000 },
-      { activityId: 'sports_int', count: 2, timestamp: Date.now() - 2000000 },
-      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1500000 },
-      { activityId: 'oss_contrib', count: 1, timestamp: Date.now() - 1000000 },
-      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 500000 },
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 6500000 },
+      { activityId: 'paper', count: 3, timestamp: Date.now() - 6000000 },
+      { activityId: 'conf', count: 2, timestamp: Date.now() - 5500000 },
+      { activityId: 'ta', count: 2, timestamp: Date.now() - 5000000 },
+      { activityId: 'dean', count: 1, timestamp: Date.now() - 4400000 },
+      { activityId: 'hack_win_int', count: 1, timestamp: Date.now() - 3800000 },
+      { activityId: 'oss_contrib', count: 2, timestamp: Date.now() - 3000000 },
+      { activityId: 'org_tech_ws', count: 3, timestamp: Date.now() - 2200000 },
     ],
-    submissionTimestamp: Date.now() - 3000000
+    submissionTimestamp: Date.now() - 6500000
   },
   {
-    id: 's5',
-    name: 'Elena Rostova',
-    yearGroup: YearGroup.Second,
+    id: 's4_4',
+    name: 'Samuel Jackson',
+    yearGroup: YearGroup.Fourth,
     activities: [
-      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 2500000 },
-      { activityId: 'ta', count: 1, timestamp: Date.now() - 2200000 },
-      { activityId: 'sub_comm', count: 3, timestamp: Date.now() - 2000000 },
-      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1800000 },
-      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
-      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 1200000 },
-      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 800000 },
-      { activityId: 'peer_end', count: 3, timestamp: Date.now() - 400000 },
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 6800000 },
+      { activityId: 'su_pres', count: 1, timestamp: Date.now() - 6200000 },
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 5600000 },
+      { activityId: 'sports_int', count: 2, timestamp: Date.now() - 4800000 },
+      { activityId: 'hack_win_nat', count: 1, timestamp: Date.now() - 4000000 },
+      { activityId: 'org_non_tech_ws', count: 3, timestamp: Date.now() - 3000000 },
+      { activityId: 'peer_end', count: 4, timestamp: Date.now() - 2000000 },
     ],
-    submissionTimestamp: Date.now() - 2500000
+    submissionTimestamp: Date.now() - 6800000
   },
   {
-    id: 's6',
-    name: 'Farhan Tan',
-    yearGroup: YearGroup.First,
+    id: 's4_5',
+    name: 'Tariq Mansoor',
+    yearGroup: YearGroup.Fourth,
     activities: [
-      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 1500000 },
-      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 1200000 },
-      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 900000 },
-      { activityId: 'cert', count: 1, timestamp: Date.now() - 600000 },
-      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 300000 },
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 7000000 },
+      { activityId: 'paper', count: 1, timestamp: Date.now() - 6400000 },
+      { activityId: 'ta', count: 2, timestamp: Date.now() - 5800000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 5100000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 4300000 },
+      { activityId: 'cert', count: 3, timestamp: Date.now() - 3400000 },
+      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 2400000 },
+      { activityId: 'guest_lec', count: 4, timestamp: Date.now() - 1400000 },
     ],
-    submissionTimestamp: Date.now() - 1500000
+    submissionTimestamp: Date.now() - 7000000
   }
 ];
 

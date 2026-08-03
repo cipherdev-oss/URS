@@ -22,7 +22,6 @@ export function subscribeToStudents(
   const colRef = collection(db, STUDENTS_COLLECTION);
   return onSnapshot(colRef, async (snapshot) => {
     if (snapshot.empty) {
-      // Seed initial dummy students to Firestore if database is fresh
       console.log('Firestore students collection is empty. Seeding initial data...');
       try {
         const batch = writeBatch(db);
@@ -36,7 +35,25 @@ export function subscribeToStudents(
       }
     } else {
       const studentsList: Student[] = snapshot.docs.map(docSnap => docSnap.data() as Student);
-      // Sort by submission timestamp or name for stability
+      
+      // Ensure any missing seed students are automatically synced into Firestore
+      const existingIds = new Set(studentsList.map(s => s.id));
+      const missingSeedStudents = initialSeedStudents.filter(s => !existingIds.has(s.id));
+
+      if (missingSeedStudents.length > 0) {
+        console.log(`Adding ${missingSeedStudents.length} missing dummy seed students to Firestore...`);
+        try {
+          const batch = writeBatch(db);
+          missingSeedStudents.forEach(student => {
+            const docRef = doc(db, STUDENTS_COLLECTION, student.id);
+            batch.set(docRef, student);
+          });
+          await batch.commit();
+        } catch (err) {
+          console.error('Error writing missing seed students to Firestore:', err);
+        }
+      }
+
       studentsList.sort((a, b) => b.submissionTimestamp - a.submissionTimestamp);
       onUpdate(studentsList);
     }
