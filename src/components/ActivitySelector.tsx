@@ -5,8 +5,9 @@
 
 import React, { useState } from 'react';
 import { Pillar, Activity, StudentActivity } from '../types';
-import { ACTIVITIES, getEffectiveActivities, getMaxCountForActivity } from '../lib/scoring';
-import { Plus, Search, Info, Check, AlertTriangle } from 'lucide-react';
+import { getEffectiveActivities, getMaxCountForActivity } from '../lib/scoring';
+import { Plus, Search, Info, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../lib/theme';
 
 interface ActivitySelectorProps {
   onAdd: (activityId: string) => void;
@@ -16,6 +17,7 @@ interface ActivitySelectorProps {
 }
 
 export function ActivitySelector({ onAdd, activities, customActivities = [], currentStudentActivities = [] }: ActivitySelectorProps) {
+  const { accentConfig } = useTheme();
   const [filter, setFilter] = useState('');
   const [activePillar, setActivePillar] = useState<Pillar | 'All'>('All');
 
@@ -49,7 +51,7 @@ export function ActivitySelector({ onAdd, activities, customActivities = [], cur
             onClick={() => setActivePillar(p as any)}
             className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
               activePillar === p 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' 
+                ? `${accentConfig.btnBg} text-white shadow-lg` 
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
@@ -76,7 +78,7 @@ export function ActivitySelector({ onAdd, activities, customActivities = [], cur
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">
+                  <span className={`text-[10px] font-bold uppercase tracking-tighter ${accentConfig.textColor}`}>
                     {activity.pillar}
                   </span>
                   {isMaxReached && (
@@ -104,7 +106,7 @@ export function ActivitySelector({ onAdd, activities, customActivities = [], cur
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                   isMaxReached 
                     ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/40' 
-                    : 'bg-slate-800 text-slate-400 group-hover:bg-blue-600 group-hover:text-white'
+                    : `bg-slate-800 text-slate-400 group-hover:${accentConfig.btnBg} group-hover:text-white`
                 }`}
               >
                 {isMaxReached ? <AlertTriangle className="w-4 h-4 text-amber-400" /> : <Plus className="w-4 h-4" />}

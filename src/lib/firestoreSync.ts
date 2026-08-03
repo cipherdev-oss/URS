@@ -85,6 +85,23 @@ export function subscribeToActivities(
       }
     } else {
       const activitiesList: Activity[] = snapshot.docs.map(docSnap => docSnap.data() as Activity);
+      const existingIds = new Set(activitiesList.map(a => a.id));
+      const missing = initialSeedActivities.filter(a => !existingIds.has(a.id));
+      
+      if (missing.length > 0) {
+        console.log(`Adding ${missing.length} missing default seed activities to Firestore...`);
+        try {
+          const batch = writeBatch(db);
+          missing.forEach(act => {
+            const docRef = doc(db, ACTIVITIES_COLLECTION, act.id);
+            batch.set(docRef, act);
+          });
+          await batch.commit();
+        } catch (err) {
+          console.error('Error syncing missing seed activities to Firestore:', err);
+        }
+      }
+
       onUpdate(activitiesList);
     }
   }, (err) => {

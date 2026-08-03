@@ -23,6 +23,8 @@ import {
   deleteStudentDoc, 
   saveActivityDoc 
 } from './lib/firestoreSync';
+import { ThemeSelector } from './components/ThemeSelector';
+import { useTheme } from './lib/theme';
 
 const STORAGE_STUDENTS_KEY = 'scoring_students_v5';
 const STORAGE_ACTIVITIES_KEY = 'scoring_activities_v3';
@@ -330,6 +332,7 @@ const DUMMY_STUDENTS: Student[] = [
 ];
 
 export default function App() {
+  const { accentConfig } = useTheme();
   const [students, setStudents] = useState<Student[]>(() => {
     try {
       const keysToTry = [
@@ -578,7 +581,7 @@ export default function App() {
       <aside className="w-80 bg-slate-900/50 border-r border-slate-800 flex flex-col shrink-0">
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+            <div className={`w-8 h-8 ${accentConfig.btnBg} rounded-lg flex items-center justify-center text-white shadow-lg transition-colors`}>
               <Award className="w-5 h-5" />
             </div>
             <div>
@@ -590,7 +593,7 @@ export default function App() {
           <div className="flex gap-2">
             <button 
               onClick={handleAddStudent}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/40"
+              className={`flex-1 ${accentConfig.btnBg} ${accentConfig.btnHover} text-white py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg`}
             >
               <PlusCircle className="w-3.5 h-3.5" />
               New Student
@@ -628,7 +631,7 @@ export default function App() {
       {/* 2. Main Content: Analytics & Workspace */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Top Header Navigation Tabs */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/40 px-8 flex items-center justify-between shrink-0">
+        <header className="h-16 border-b border-slate-800 bg-slate-900/40 px-6 sm:px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             {/* View Mode Switcher */}
             <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
@@ -636,7 +639,7 @@ export default function App() {
                 onClick={() => setCurrentView('workspace')}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
                   currentView === 'workspace' 
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' 
+                    ? `${accentConfig.btnBg} text-white shadow-md` 
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                 }`}
               >
@@ -648,11 +651,11 @@ export default function App() {
                 onClick={() => setCurrentView('comparison')}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
                   currentView === 'comparison' 
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' 
+                    ? `${accentConfig.btnBg} text-white shadow-md` 
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                 }`}
               >
-                <Scale className="w-3.5 h-3.5 text-blue-400" />
+                <Scale className={`w-3.5 h-3.5 ${currentView === 'comparison' ? 'text-white' : accentConfig.textColor}`} />
                 Compare Students
               </button>
             </div>
@@ -664,42 +667,47 @@ export default function App() {
             </div>
           </div>
 
-          {currentView === 'workspace' && activeStudent && (
-            <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            {currentView === 'workspace' && activeStudent && (
               <div className="flex items-center gap-4">
-                <input 
-                  className="bg-transparent text-lg font-bold border-none p-0 focus:ring-0 text-slate-100 w-48 focus:bg-slate-900/50 rounded px-2 transition-all"
-                  value={activeStudent.name}
-                  onChange={(e) => updateStudentMetadata({ name: e.target.value })}
-                />
-                <div className="h-5 w-px bg-slate-800" />
-                <select 
-                  className="bg-transparent border-none p-0 text-xs font-bold uppercase tracking-widest text-slate-400 focus:ring-0 cursor-pointer hover:text-slate-200 transition-colors"
-                  value={activeStudent.yearGroup}
-                  onChange={(e) => updateStudentMetadata({ yearGroup: e.target.value as YearGroup })}
+                <div className="flex items-center gap-3">
+                  <input 
+                    className="bg-transparent text-lg font-bold border-none p-0 focus:ring-0 text-slate-100 w-40 sm:w-48 focus:bg-slate-900/50 rounded px-2 transition-all"
+                    value={activeStudent.name}
+                    onChange={(e) => updateStudentMetadata({ name: e.target.value })}
+                  />
+                  <div className="h-5 w-px bg-slate-800" />
+                  <select 
+                    className="bg-transparent border-none p-0 text-xs font-bold uppercase tracking-widest text-slate-400 focus:ring-0 cursor-pointer hover:text-slate-200 transition-colors"
+                    value={activeStudent.yearGroup}
+                    onChange={(e) => updateStudentMetadata({ yearGroup: e.target.value as YearGroup })}
+                  >
+                    {Object.values(YearGroup).map(yg => (
+                      <option key={yg} value={yg} className="bg-slate-950 text-slate-100">{yg}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button 
+                  onClick={() => deleteStudent(activeStudent.id)}
+                  className="text-slate-600 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-slate-800"
+                  title="Delete Student"
                 >
-                  {Object.values(YearGroup).map(yg => (
-                    <option key={yg} value={yg} className="bg-slate-950 text-slate-100">{yg}</option>
-                  ))}
-                </select>
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
+            )}
 
-              <button 
-                onClick={() => deleteStudent(activeStudent.id)}
-                className="text-slate-600 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-slate-800"
-                title="Delete Student"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+            {currentView === 'comparison' && (
+              <div className="text-xs font-mono text-slate-400 hidden md:flex items-center gap-2 mr-2">
+                <Users className={`w-4 h-4 ${accentConfig.textColor}`} />
+                <span>Cohort Size: <strong className="text-slate-200">{students.length}</strong></span>
+              </div>
+            )}
 
-          {currentView === 'comparison' && (
-            <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
-              <span>Cohort Size: <strong className="text-slate-200">{students.length}</strong></span>
-            </div>
-          )}
+            {/* Theme & Palette Switcher */}
+            <ThemeSelector />
+          </div>
         </header>
 
         {/* Floating Cap Notification Toast */}

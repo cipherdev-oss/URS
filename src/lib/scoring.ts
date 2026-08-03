@@ -10,34 +10,49 @@ export const ACTIVITIES: Activity[] = [
   { id: "gpa_5", pillar: Pillar.Academic, name: "GPA in top 5% of batch", base: 40, step: 0, floor: 40, type: "Milestone" },
   { id: "gpa_10", pillar: Pillar.Academic, name: "GPA in top 10% of batch", base: 25, step: 0, floor: 25, type: "Milestone" },
   { id: "gpa_20", pillar: Pillar.Academic, name: "GPA in top 20% of batch", base: 15, step: 0, floor: 15, type: "Milestone" },
-  { id: "paper", pillar: Pillar.Academic, name: "Published paper (IEEE/Elsevier)", base: 30, step: 3, floor: 15, type: "Active", hardCap: 60 },
+  { id: "paper", pillar: Pillar.Academic, name: "Published paper (IEEE/Springer/Elsevier)", base: 30, step: 3, floor: 15, type: "Active", hardCap: 60 },
   { id: "conf", pillar: Pillar.Academic, name: "Presented paper at recognized conference", base: 15, step: 2, floor: 5, type: "Active", hardCap: 30 },
-  { id: "ta", pillar: Pillar.Academic, name: "Teaching Assistant", base: 15, step: 2, floor: 5, type: "Active", hardCap: 30 },
+  { id: "ta", pillar: Pillar.Academic, name: "Teaching Assistant (per semester)", base: 15, step: 2, floor: 5, type: "Active", hardCap: 30 },
   { id: "dean", pillar: Pillar.Academic, name: "Dean's List / Honor Roll", base: 20, step: 0, floor: 20, type: "Milestone" },
 
-  // Pillar 2: Leadership
+  // Pillar 2: Leadership & Organization
   { id: "su_pres", pillar: Pillar.Leadership, name: "Student Union President", base: 40, step: 4, floor: 20, type: "Active" },
-  { id: "soc_pres", pillar: Pillar.Leadership, name: "Society President / Exec Head", base: 30, step: 3, floor: 15, type: "Active" },
+  { id: "soc_pres", pillar: Pillar.Leadership, name: "Society President / Executive Head", base: 30, step: 3, floor: 15, type: "Active" },
+  { id: "vp_sec_treas", pillar: Pillar.Leadership, name: "VP / Secretary / Treasurer", base: 20, step: 2, floor: 10, type: "Active" },
+  { id: "exec_comm", pillar: Pillar.Leadership, name: "Executive Committee Member", base: 15, step: 2, floor: 5, type: "Active" },
   { id: "batch_rep", pillar: Pillar.Leadership, name: "Batch Representative", base: 15, step: 2, floor: 5, type: "Active" },
-  { id: "sub_comm", pillar: Pillar.Leadership, name: "Subcommittee Active Member", base: 5, step: 1, floor: 1, type: "Passive", hardCap: 15 },
+  { id: "sub_comm", pillar: Pillar.Leadership, name: "Sub-committee Active Member", base: 5, step: 1, floor: 1, type: "Passive", hardCap: 15 },
 
-  // Pillar 3: Arts & Sports
-  { id: "sports_int", pillar: Pillar.ArtsSports, name: "National/International Sports", base: 40, step: 4, floor: 20, type: "Active" },
+  // Pillar 3: Arts, Culture & Sports
+  { id: "sports_int", pillar: Pillar.ArtsSports, name: "National / International sports representation", base: 40, step: 4, floor: 20, type: "Active" },
   { id: "sports_gold", pillar: Pillar.ArtsSports, name: "Inter-faculty Gold Medal", base: 25, step: 3, floor: 10, type: "Active" },
-  { id: "sports_silver", pillar: Pillar.ArtsSports, name: "Inter-faculty Silver/Bronze", base: 15, step: 2, floor: 5, type: "Active" },
+  { id: "sports_silver", pillar: Pillar.ArtsSports, name: "Inter-faculty Silver / Bronze", base: 15, step: 2, floor: 5, type: "Active" },
+  { id: "team_captain", pillar: Pillar.ArtsSports, name: "Team Captain / Vice Captain", base: 15, step: 2, floor: 5, type: "Active" },
   { id: "squad", pillar: Pillar.ArtsSports, name: "Squad Member", base: 10, step: 1, floor: 2, type: "Passive", hardCap: 30 },
+  { id: "lead_director", pillar: Pillar.ArtsSports, name: "Lead Director / Music Act (university-wide)", base: 20, step: 2, floor: 10, type: "Active" },
+  { id: "ensemble_member", pillar: Pillar.ArtsSports, name: "Ensemble / Orchestra Member", base: 10, step: 1, floor: 2, type: "Passive" },
+  { id: "stage_crew_lead", pillar: Pillar.ArtsSports, name: "Stage / Technical Crew Lead", base: 10, step: 1, floor: 2, type: "Active" },
 
-  // Pillar 4: Tech & Hackathons
-  { id: "hack_win_int", pillar: Pillar.TechInnovation, name: "Intl. Hackathon Winner", base: 35, step: 4, floor: 18, type: "Active" },
-  { id: "hack_win_nat", pillar: Pillar.TechInnovation, name: "National Hackathon Winner", base: 25, step: 3, floor: 13, type: "Active" },
-  { id: "oss_contrib", pillar: Pillar.TechInnovation, name: "Significant OSS Contribution", base: 20, step: 2, floor: 10, type: "Active", hardCap: 40 },
-  { id: "cert", pillar: Pillar.TechInnovation, name: "Industry Certification", base: 10, step: 0, floor: 10, type: "Milestone", hardCap: 20 },
+  // Pillar 4: Technology, Innovation & Hackathons
+  { id: "hack_win_int", pillar: Pillar.TechInnovation, name: "International Hackathon Winner (Top 3)", base: 35, step: 4, floor: 18, type: "Active" },
+  { id: "hack_win_nat", pillar: Pillar.TechInnovation, name: "National / Regional Hackathon Winner", base: 25, step: 3, floor: 13, type: "Active" },
+  { id: "hack_finalist_int", pillar: Pillar.TechInnovation, name: "International Hackathon Finalist", base: 20, step: 2, floor: 10, type: "Active" },
+  { id: "hack_finalist_nat", pillar: Pillar.TechInnovation, name: "National Hackathon Finalist", base: 15, step: 2, floor: 8, type: "Active" },
+  { id: "hack_part", pillar: Pillar.TechInnovation, name: "Hackathon Participation (with project submission)", base: 3, step: 1, floor: 1, type: "Passive", hardCap: 12 },
+  { id: "oss_contrib", pillar: Pillar.TechInnovation, name: "Significant Open Source Contribution", base: 20, step: 2, floor: 10, type: "Active", hardCap: 40 },
+  { id: "pub_dev_tool", pillar: Pillar.TechInnovation, name: "Published Developer Tool / CLI / Security Tool", base: 15, step: 2, floor: 8, type: "Active", hardCap: 30 },
+  { id: "ctf_local", pillar: Pillar.TechInnovation, name: "CTF Competition Ranking (Local)", base: 15, step: 2, floor: 8, type: "Active" },
+  { id: "ctf_nat", pillar: Pillar.TechInnovation, name: "CTF Competition Ranking (National)", base: 20, step: 2, floor: 10, type: "Active" },
+  { id: "ctf_int", pillar: Pillar.TechInnovation, name: "CTF Competition Ranking (International)", base: 30, step: 3, floor: 15, type: "Active" },
+  { id: "cert", pillar: Pillar.TechInnovation, name: "Industry Certification (AWS/Azure/GCP/Security+/etc.)", base: 10, step: 0, floor: 10, type: "Milestone", hardCap: 20 },
 
-  // Pillar 5: Community
-  { id: "org_tech_ws", pillar: Pillar.Community, name: "Organized Tech Workshop", base: 15, step: 2, floor: 5, type: "Active", hardCap: 30 },
-  { id: "org_non_tech_ws", pillar: Pillar.Community, name: "Organized Non-Tech Workshop", base: 10, step: 1, floor: 3, type: "Active", hardCap: 20 },
-  { id: "peer_end", pillar: Pillar.Community, name: "Peer Endorsement", base: 5, step: 1, floor: 1, type: "Active", hardCap: 20 },
-  { id: "guest_lec", pillar: Pillar.Community, name: "Guest Lecture Attendance", base: 2, step: 0.5, floor: 1, type: "Passive", hardCap: 10 },
+  // Pillar 5: Community, Volunteering & Life Skills
+  { id: "org_tech_ws", pillar: Pillar.Community, name: "Organized technical workshop for juniors", base: 15, step: 2, floor: 5, type: "Active", hardCap: 30 },
+  { id: "org_non_tech_ws", pillar: Pillar.Community, name: "Organized non-technical workshop", base: 10, step: 1, floor: 3, type: "Active", hardCap: 20 },
+  { id: "attended_ext_ws", pillar: Pillar.Community, name: "Attended external workshop / bootcamp", base: 3, step: 1, floor: 1, type: "Passive", hardCap: 15 },
+  { id: "peer_end", pillar: Pillar.Community, name: "Peer Endorsement (structured)", base: 7, step: 1, floor: 2, type: "Active", hardCap: 20 },
+  { id: "community_volunteering", pillar: Pillar.Community, name: "Community volunteering (outside LNBTI)", base: 10, step: 1, floor: 3, type: "Active", hardCap: 20 },
+  { id: "guest_lec", pillar: Pillar.Community, name: "Industry talk / Guest lecture attendance", base: 2, step: 0.5, floor: 1, type: "Passive", hardCap: 10 },
 ];
 
 export function getEffectiveActivities(customOrAllActivities: Activity[] = []): Activity[] {
