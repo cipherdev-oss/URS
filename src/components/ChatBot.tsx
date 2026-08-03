@@ -17,6 +17,124 @@ const PRESET_QUESTIONS = [
   "How are tie-breakers decided in student rankings?"
 ];
 
+function getSmartLocalResponse(query: string): string {
+  const q = query.toLowerCase();
+
+  if (q.includes('diminish') || q.includes('return') || q.includes('dr') || q.includes('repeat')) {
+    return `**Diminishing Returns (DR) Formula**
+
+To encourage well-rounded involvement and prevent over-farming a single task, repeating active activities yields progressively fewer points:
+
+- **Formula**: \`Points for N-th time = max(Floor, Base - (N - 1) * Step)\`
+- **Example (Teaching Assistant)**:
+  - 1st time: **15 pts** (Base)
+  - 2nd time: **13 pts** (Base - Step)
+  - 3rd time: **11 pts**
+  - Floor: **5 pts** minimum per repetition thereafter until activity hard cap is reached.`;
+  }
+
+  if (q.includes('40%') || q.includes('dominance') || q.includes('cap') && (q.includes('pillar') || q.includes('rule') || q.includes('algorithm'))) {
+    return `**40% Dominance Capping Rule**
+
+To ensure students demonstrate well-rounded excellence across all 5 pillars rather than relying solely on a single area:
+
+- **Rule**: A single pillar's score cannot exceed **2/3 (66.67%)** of the combined sum of the other 4 pillars.
+- **Impact**: This mathematically guarantees no single pillar accounts for more than **40%** of the student's total raw score.
+- **Algorithm**: The system applies a simultaneous fixed-point iteration algorithm to cap dominant pillars iteratively until full mathematical equilibrium is achieved.`;
+  }
+
+  if (q.includes('gate') || q.includes('bonus') || q.includes('multiplier') || q.includes('year hero') || q.includes('qualify')) {
+    return `**Balance Gate & Bonus Multiplier**
+
+- **Balance Gate Requirement**: To qualify for Year Hero rankings, a student must achieve at least **20 raw points** in at least **4 out of 5 pillars**.
+- **Continuity Bonus Award**:
+  - **Min Pillar Score (20 - 30 pts)**: Grants **+5% base bonus** + **0.5% for every point** above 20.
+  - **Min Pillar Score > 30 pts**: Grants the maximum **+10% bonus** on top of the total capped score!`;
+  }
+
+  if (q.includes('hard cap') || q.includes('activity cap') || q.includes('max point') || q.includes('limit')) {
+    return `**Activity Hard Point Caps**
+
+Many repeatable activities feature strict maximum point caps:
+
+- **Academic**: Published Papers (Cap: 60 pts), Conference Presentations (Cap: 30 pts), TA (Cap: 30 pts).
+- **Leadership**: Subcommittee Member (Cap: 15 pts).
+- **Arts & Sports**: Squad Member (Cap: 30 pts).
+- **Tech & Innovation**: Open Source Contribution (Cap: 40 pts), Industry Certification (Cap: 20 pts).
+- **Community**: Tech Workshop Organizer (Cap: 30 pts), Non-Tech Workshop Organizer (Cap: 20 pts), Peer Endorsement (Cap: 20 pts), Guest Lecture Attendance (Cap: 10 pts).`;
+  }
+
+  if (q.includes('tie') || q.includes('break') || q.includes('equal') || q.includes('same score') || q.includes('order')) {
+    return `**Ranking Tie-Breaking Hierarchy (§4.4)**
+
+When two or more students achieve identical scores, rankings are determined by:
+
+1. **Higher Final Score** (including Balance Gate bonuses)
+2. **Higher Minimum Pillar Score** (rewards well-roundedness across all 5 pillars)
+3. **Earlier Submission Timestamp** (rewards prompt logging)
+4. **Alphabetical Student Name** (A to Z)`;
+  }
+
+  if (q.includes('academic') || q.includes('gpa') || q.includes('paper') || q.includes('dean')) {
+    return `**Academic Pillar Point Rules**
+
+- **GPA Milestones** *(Non-stacking, awards highest tier)*:
+  - Top 5%: **40 pts**
+  - Top 10%: **25 pts**
+  - Top 20%: **15 pts**
+- **Published Research Papers**: Base 30, Step 3, Floor 15 (Hard Cap: 60 pts)
+- **Conference Presentations**: Base 15, Step 2, Floor 5 (Hard Cap: 30 pts)
+- **Teaching Assistant (TA)**: Base 15, Step 2, Floor 5 (Hard Cap: 30 pts)
+- **Dean's List**: **20 pts**`;
+  }
+
+  if (q.includes('leadership') || q.includes('president') || q.includes('society') || q.includes('subcommittee')) {
+    return `**Leadership Pillar Point Rules**
+
+- **Student Union President**: Base 40, Step 4, Floor 20
+- **Society Executive Head**: Base 30, Step 3, Floor 15
+- **Batch Representative**: Base 15, Step 2, Floor 5
+- **Subcommittee Member**: Base 5, Step 1, Floor 1 (Hard Cap: 15 pts)`;
+  }
+
+  if (q.includes('tech') || q.includes('hackathon') || q.includes('oss') || q.includes('certification')) {
+    return `**Tech & Innovation Pillar Point Rules**
+
+- **International Hackathon Winner**: Base 35, Step 4, Floor 18
+- **National Hackathon Winner**: Base 25, Step 3, Floor 13
+- **Open Source Contribution**: Base 20, Step 2, Floor 10 (Hard Cap: 40 pts)
+- **Industry Certification**: **10 pts** per cert (Hard Cap: 20 pts)`;
+  }
+
+  if (q.includes('sports') || q.includes('art') || q.includes('gold') || q.includes('silver') || q.includes('squad')) {
+    return `**Arts & Sports Pillar Point Rules**
+
+- **International / National Sports**: Base 40, Step 4, Floor 20
+- **Inter-faculty Gold Medal**: Base 25, Step 3, Floor 10
+- **Inter-faculty Silver / Bronze**: Base 15, Step 2, Floor 5
+- **Squad / Club Active Member**: Base 10, Step 1, Floor 2 (Hard Cap: 30 pts)`;
+  }
+
+  if (q.includes('community') || q.includes('peer') || q.includes('workshop') || q.includes('lecture')) {
+    return `**Community Pillar Point Rules**
+
+- **Tech Workshop Organizer**: Base 15, Step 2, Floor 5 (Hard Cap: 30 pts)
+- **Non-Tech Workshop Organizer**: Base 10, Step 1, Floor 3 (Hard Cap: 20 pts)
+- **Peer Endorsement**: Base 5, Step 1, Floor 1 (Hard Cap: 20 pts)
+- **Guest Lecture Attendance**: Base 2, Step 0.5, Floor 1 (Hard Cap: 10 pts)`;
+  }
+
+  return `**LNBTI Student Balanced Ranking System Guide**
+
+I can answer any questions about the 5 Pillars, point rules, formulas, and ranking algorithms:
+
+- **5 Pillars**: Academic, Leadership, Arts & Sports, Tech & Innovation, Community.
+- **Diminishing Returns**: Repeating active activities yields fewer points (\`Base - (N-1)*Step\`).
+- **40% Dominance Cap**: Single pillar cannot exceed 2/3 of remaining 4 pillars.
+- **Balance Gate**: Reach ≥20pts in at least 4 pillars to earn a +5% to +10% bonus boost!
+- **Tie-Breakers**: 1. Final Score, 2. Minimum Pillar Score, 3. Earliest Timestamp, 4. Name.`;
+}
+
 export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -80,20 +198,22 @@ export function ChatBot() {
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: data.reply || "Sorry, I couldn't process your request right now. Please try again.",
+        text: data.reply || getSmartLocalResponse(query),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setMessages(prev => [...prev, botMsg]);
     } catch (err: any) {
-      console.error("Chat error:", err);
-      const errorMsg: ChatMessage = {
+      console.warn("Backend chat endpoint unavailable or running static host (e.g., Netlify). Using client knowledge engine:", err);
+      
+      const localAnswer = getSmartLocalResponse(query);
+      const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: "⚠️ I encountered a temporary connection issue. Here is a summary of key point allocation rules:\n\n- **Diminishing Returns**: Repeating active activities yields fewer points.\n- **40% Cap**: Single pillar cannot exceed 2/3 of remaining 4 pillars.\n- **Balance Bonus**: Pass 4/5 pillars (≥20pts) to earn +5% to +10% bonus score.",
+        text: localAnswer,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => [...prev, botMsg]);
     } finally {
       setIsLoading(false);
     }

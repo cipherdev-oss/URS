@@ -14,41 +14,132 @@ import { Leaderboard } from './components/Leaderboard';
 import { ActivityManager } from './components/ActivityManager';
 import { RulesView } from './components/RulesView';
 import { ChatBot } from './components/ChatBot';
+import { StudentComparisonView } from './components/StudentComparisonView';
+import { Scale } from 'lucide-react';
 
-const STORAGE_STUDENTS_KEY = 'scoring_students_v3';
+const STORAGE_STUDENTS_KEY = 'scoring_students_v4';
 const STORAGE_ACTIVITIES_KEY = 'scoring_activities_v3';
 
 const DUMMY_STUDENTS: Student[] = [
   {
     id: 's1',
     name: 'Alice Johnson',
-    yearGroup: YearGroup.First,
+    yearGroup: YearGroup.Fourth,
     activities: [
-      { activityId: 'gpa_5', count: 1, timestamp: Date.now() },
-      { activityId: 'su_pres', count: 1, timestamp: Date.now() },
-      { activityId: 'sports_int', count: 1, timestamp: Date.now() },
-      { activityId: 'org_tech_ws', count: 1, timestamp: Date.now() },
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 5000000 },
+      { activityId: 'ta', count: 1, timestamp: Date.now() - 4500000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 4000000 },
+      { activityId: 'sub_comm', count: 2, timestamp: Date.now() - 3800000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 3500000 },
+      { activityId: 'squad', count: 2, timestamp: Date.now() - 3000000 },
+      { activityId: 'hack_win_nat', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 2000000 },
+      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 1500000 },
+      { activityId: 'peer_end', count: 2, timestamp: Date.now() - 1000000 },
     ],
-    submissionTimestamp: Date.now() - 1000000
+    submissionTimestamp: Date.now() - 5000000
   },
   {
     id: 's2',
     name: 'Bob Smith',
+    yearGroup: YearGroup.Third,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 4000000 },
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 3500000 },
+      { activityId: 'sports_silver', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'hack_win_int', count: 2, timestamp: Date.now() - 2500000 },
+      { activityId: 'oss_contrib', count: 3, timestamp: Date.now() - 2000000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 1000000 },
+    ],
+    submissionTimestamp: Date.now() - 4000000
+  },
+  {
+    id: 's3',
+    name: 'Carol Chen',
+    yearGroup: YearGroup.Fourth,
+    activities: [
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 6000000 },
+      { activityId: 'paper', count: 2, timestamp: Date.now() - 5500000 },
+      { activityId: 'conf', count: 2, timestamp: Date.now() - 5000000 },
+      { activityId: 'dean', count: 1, timestamp: Date.now() - 4500000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 4000000 },
+      { activityId: 'squad', count: 2, timestamp: Date.now() - 3500000 },
+      { activityId: 'cert', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'org_tech_ws', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'guest_lec', count: 3, timestamp: Date.now() - 2000000 },
+    ],
+    submissionTimestamp: Date.now() - 6000000
+  },
+  {
+    id: 's4',
+    name: 'David Jayawardena',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_20', count: 1, timestamp: Date.now() - 3000000 },
+      { activityId: 'su_pres', count: 1, timestamp: Date.now() - 2800000 },
+      { activityId: 'batch_rep', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'sports_int', count: 2, timestamp: Date.now() - 2000000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1500000 },
+      { activityId: 'oss_contrib', count: 1, timestamp: Date.now() - 1000000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 500000 },
+    ],
+    submissionTimestamp: Date.now() - 3000000
+  },
+  {
+    id: 's5',
+    name: 'Elena Rostova',
+    yearGroup: YearGroup.Second,
+    activities: [
+      { activityId: 'gpa_10', count: 1, timestamp: Date.now() - 2500000 },
+      { activityId: 'ta', count: 1, timestamp: Date.now() - 2200000 },
+      { activityId: 'sub_comm', count: 3, timestamp: Date.now() - 2000000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 1800000 },
+      { activityId: 'cert', count: 2, timestamp: Date.now() - 1500000 },
+      { activityId: 'org_tech_ws', count: 2, timestamp: Date.now() - 1200000 },
+      { activityId: 'org_non_tech_ws', count: 2, timestamp: Date.now() - 800000 },
+      { activityId: 'peer_end', count: 3, timestamp: Date.now() - 400000 },
+    ],
+    submissionTimestamp: Date.now() - 2500000
+  },
+  {
+    id: 's6',
+    name: 'Farhan Tan',
     yearGroup: YearGroup.First,
     activities: [
-      { activityId: 'gpa_10', count: 1, timestamp: Date.now() },
-      { activityId: 'oss_contrib', count: 5, timestamp: Date.now() },
-      { activityId: 'cert', count: 2, timestamp: Date.now() },
+      { activityId: 'gpa_5', count: 1, timestamp: Date.now() - 1500000 },
+      { activityId: 'soc_pres', count: 1, timestamp: Date.now() - 1200000 },
+      { activityId: 'sports_gold', count: 1, timestamp: Date.now() - 900000 },
+      { activityId: 'cert', count: 1, timestamp: Date.now() - 600000 },
+      { activityId: 'guest_lec', count: 2, timestamp: Date.now() - 300000 },
     ],
-    submissionTimestamp: Date.now() - 500000
+    submissionTimestamp: Date.now() - 1500000
   }
 ];
 
 export default function App() {
   const [students, setStudents] = useState<Student[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_STUDENTS_KEY);
-      if (saved) return JSON.parse(saved);
+      // Check current key and fallback to older keys to prevent resetting user modifications
+      const keysToTry = [
+        STORAGE_STUDENTS_KEY,
+        'scoring_students_v3',
+        'scoring_students_v2',
+        'scoring_students_v1',
+        'scoring_students'
+      ];
+
+      for (const key of keysToTry) {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Migrate to active storage key
+            localStorage.setItem(STORAGE_STUDENTS_KEY, JSON.stringify(parsed));
+            return parsed;
+          }
+        }
+      }
     } catch (e) {
       console.error("Failed to load saved students", e);
     }
@@ -66,6 +157,7 @@ export default function App() {
   });
 
   const [activeStudentId, setActiveStudentId] = useState<string | null>(() => students[0]?.id || null);
+  const [currentView, setCurrentView] = useState<'workspace' | 'comparison'>('workspace');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   
@@ -270,7 +362,10 @@ export default function App() {
           <Leaderboard 
             students={students} 
             activities={activities}
-            onSelectStudent={(s) => setActiveStudentId(s.id)}
+            onSelectStudent={(s) => {
+              setActiveStudentId(s.id);
+              setCurrentView('workspace');
+            }}
             activeStudentId={activeStudentId}
           />
         </div>
@@ -278,6 +373,75 @@ export default function App() {
 
       {/* 2. Main Content: Analytics & Workspace */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Top Header Navigation Tabs */}
+        <header className="h-16 border-b border-slate-800 bg-slate-900/40 px-8 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4">
+            {/* View Mode Switcher */}
+            <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <button
+                onClick={() => setCurrentView('workspace')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                  currentView === 'workspace' 
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Student Workspace
+              </button>
+              
+              <button
+                onClick={() => setCurrentView('comparison')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                  currentView === 'comparison' 
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                <Scale className="w-3.5 h-3.5 text-blue-400" />
+                Compare Students
+              </button>
+            </div>
+          </div>
+
+          {currentView === 'workspace' && activeStudent && (
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
+                <input 
+                  className="bg-transparent text-lg font-bold border-none p-0 focus:ring-0 text-slate-100 w-48 focus:bg-slate-900/50 rounded px-2 transition-all"
+                  value={activeStudent.name}
+                  onChange={(e) => updateStudentMetadata({ name: e.target.value })}
+                />
+                <div className="h-5 w-px bg-slate-800" />
+                <select 
+                  className="bg-transparent border-none p-0 text-xs font-bold uppercase tracking-widest text-slate-400 focus:ring-0 cursor-pointer hover:text-slate-200 transition-colors"
+                  value={activeStudent.yearGroup}
+                  onChange={(e) => updateStudentMetadata({ yearGroup: e.target.value as YearGroup })}
+                >
+                  {Object.values(YearGroup).map(yg => (
+                    <option key={yg} value={yg} className="bg-slate-950 text-slate-100">{yg}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button 
+                onClick={() => deleteStudent(activeStudent.id)}
+                className="text-slate-600 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-slate-800"
+                title="Delete Student"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {currentView === 'comparison' && (
+            <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-400" />
+              <span>Cohort Size: <strong className="text-slate-200">{students.length}</strong></span>
+            </div>
+          )}
+        </header>
+
         {/* Floating Cap Notification Toast */}
         <AnimatePresence>
           {toastNotification && (
@@ -285,7 +449,7 @@ export default function App() {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="absolute top-4 right-8 z-[200] max-w-md bg-amber-950/90 border border-amber-500/50 text-amber-100 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-start gap-3"
+              className="absolute top-20 right-8 z-[200] max-w-md bg-amber-950/90 border border-amber-500/50 text-amber-100 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-start gap-3"
             >
               <div className="p-2 bg-amber-500/20 rounded-xl text-amber-400 shrink-0">
                 <AlertTriangle className="w-5 h-5" />
@@ -303,40 +467,20 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
-        {activeStudent ? (
-          <>
-            {/* Context Header */}
-            <header className="h-16 border-b border-slate-800 bg-slate-900/20 px-8 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-8">
-                <div className="space-y-0.5">
-                  <input 
-                    className="bg-transparent text-lg font-bold border-none p-0 focus:ring-0 text-slate-100 w-48"
-                    value={activeStudent.name}
-                    onChange={(e) => updateStudentMetadata({ name: e.target.value })}
-                  />
-                </div>
-                <div className="h-6 w-px bg-slate-800" />
-                <select 
-                  className="bg-transparent border-none p-0 text-xs font-bold uppercase tracking-widest text-slate-500 focus:ring-0 cursor-pointer hover:text-slate-300 transition-colors"
-                  value={activeStudent.yearGroup}
-                  onChange={(e) => updateStudentMetadata({ yearGroup: e.target.value as YearGroup })}
-                >
-                  {Object.values(YearGroup).map(yg => (
-                    <option key={yg} value={yg} className="bg-slate-950 text-slate-100">{yg}</option>
-                  ))}
-                </select>
-              </div>
 
-              <button 
-                onClick={() => deleteStudent(activeStudent.id)}
-                className="text-slate-600 hover:text-red-500 transition-colors p-2"
-                title="Delete Student"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </header>
-
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
+        {/* Main View Area */}
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          {currentView === 'comparison' ? (
+            <StudentComparisonView 
+              students={students}
+              activities={activities}
+              onSelectStudentForEdit={(id) => {
+                setActiveStudentId(id);
+                setCurrentView('workspace');
+              }}
+            />
+          ) : activeStudent ? (
+            <div className="space-y-8">
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
                 {/* Analytics Panel */}
                 <div className="xl:col-span-7 space-y-8">
@@ -466,16 +610,16 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center flex-col text-center p-8">
-            <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-slate-700 mb-4">
-              <Users className="w-8 h-8" />
+          ) : (
+            <div className="flex-1 flex items-center justify-center flex-col text-center p-8">
+              <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-slate-700 mb-4">
+                <Users className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-400 mb-2">No Student Selected</h2>
+              <p className="text-sm text-slate-600 max-w-xs">Select a student from the sidebar or create a new one to start simulating.</p>
             </div>
-            <h2 className="text-xl font-bold text-slate-400 mb-2">No Student Selected</h2>
-            <p className="text-sm text-slate-600 max-w-xs">Select a student from the sidebar or create a new one to start simulating.</p>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Rules Overlay */}
         <AnimatePresence>
